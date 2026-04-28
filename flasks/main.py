@@ -148,6 +148,106 @@ def one_capteur(capteur_id):
     return jsonify(result)
 
 
+@app.route("/dashboard")
+def dashboard():
+
+    capteur = request.args.get("capteur", "a6")
+    type_data = request.args.get("type", "raw")
+
+    conn = sqlite3.connect(DB_NAME)
+    cur = conn.cursor()
+
+    if type_data == "filtered":
+        cur.execute("""
+        SELECT filtered_value
+        FROM mesures
+        WHERE capteur_id=?
+        ORDER BY id ASC
+        """, (capteur,))
+    else:
+        cur.execute("""
+        SELECT raw_value
+        FROM mesures
+        WHERE capteur_id=?
+        ORDER BY id ASC
+        """, (capteur,))
+
+    rows = cur.fetchall()
+    conn.close()
+
+    values = [r[0] for r in rows]
+
+    import matplotlib.pyplot as plt
+    import io, base64
+
+    plt.figure()
+    plt.plot(values)
+    plt.title(f"Capteur {capteur} - {type_data}")
+    plt.xlabel("temps")
+    plt.ylabel("valeur")
+
+    img = io.BytesIO()
+    plt.savefig(img, format="png")
+    plt.close()
+    img.seek(0)
+
+    graph = base64.b64encode(img.getvalue()).decode()
+
+    return f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard Capteurs</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <meta http-equiv="refresh" content="2">
+</head>
+
+<body class="bg-dark text-light">
+
+<div class="container mt-4">
+
+    <h1 class="text-center mb-4">📊 Dashboard Capteurs</h1>
+
+    <div class="card bg-secondary text-white p-3 mb-3">
+
+        <form method="get" class="row g-3">
+
+            <div class="col-md-6">
+                <label class="form-label">Capteur</label>
+                <input class="form-control" name="capteur" value="{capteur}">
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Type</label>
+                <select class="form-control" name="type">
+                    <option value="raw" {"selected" if type_data=="raw" else ""}>Raw</option>
+                    <option value="filtered" {"selected" if type_data=="filtered" else ""}>Filtered</option>
+                </select>
+            </div>
+
+            <div class="col-12">
+                <button class="btn btn-primary w-100">Afficher</button>
+            </div>
+
+        </form>
+    </div>
+
+    <div class="card bg-dark border-light p-3 text-center">
+
+        <img src="data:image/png;base64,{graph}" class="img-fluid">
+
+    </div>
+
+</div>
+
+</body>
+</html>
+"""
+
+
+
 # =====================================
 # PAGE TEST
 # =====================================
