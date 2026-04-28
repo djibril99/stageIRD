@@ -12,6 +12,7 @@ DB_NAME = "capteurs.db"
 # INIT BASE SQLITE
 # =====================================
 def init_db():
+    
     conn = sqlite3.connect(DB_NAME)
     cur = conn.cursor()
 
@@ -151,38 +152,130 @@ def one_capteur(capteur_id):
 @app.route("/dashboard")
 def dashboard():
 
-    capteur = request.args.get("capteur", "a6")
+    capteur = request.args.get("capteur", "ALL")
     type_data = request.args.get("type", "raw")
 
     conn = sqlite3.connect(DB_NAME)
     cur = conn.cursor()
 
-    if type_data == "filtered":
-        cur.execute("""
-        SELECT filtered_value
-        FROM mesures
-        WHERE capteur_id=?
-        ORDER BY id ASC
-        """, (capteur,))
-    else:
-        cur.execute("""
-        SELECT raw_value
-        FROM mesures
-        WHERE capteur_id=?
-        ORDER BY id ASC
-        """, (capteur,))
-
-    rows = cur.fetchall()
-    conn.close()
-
-    values = [r[0] for r in rows]
+    # =====================================
+    # LISTE DYNAMIQUE DES CAPTEURS
+    # =====================================
+    cur.execute("SELECT DISTINCT capteur_id FROM mesures ORDER BY capteur_id")
+    capteurs_db = [c[0] for c in cur.fetchall()]
 
     import matplotlib.pyplot as plt
     import io, base64
 
     plt.figure()
-    plt.plot(values)
-    plt.title(f"Capteur {capteur} - {type_data}")
+
+    # =====================================
+    # CAS ALL CAPTEURS
+    # =====================================
+    if capteur == "ALL":
+
+        for c in capteurs_db:
+
+            if type_data == "ALL":
+
+                cur.execute("""
+                    SELECT raw_value, filtered_value
+                    FROM mesures
+                    WHERE capteur_id=?
+                    ORDER BY id ASC
+                """, (c,))
+
+                raw = []
+                filt = []
+
+                for r in cur.fetchall():
+                    raw.append(r[0])
+                    filt.append(r[1])
+
+                plt.plot(raw, label=f"{c} raw")
+                plt.plot(filt, label=f"{c} filtered")
+
+            elif type_data == "filtered":
+
+                cur.execute("""
+                    SELECT filtered_value
+                    FROM mesures
+                    WHERE capteur_id=?
+                    ORDER BY id ASC
+                """, (c,))
+
+                values = [r[0] for r in cur.fetchall()]
+                plt.plot(values, label=f"{c} filtered")
+
+            else:
+
+                cur.execute("""
+                    SELECT raw_value
+                    FROM mesures
+                    WHERE capteur_id=?
+                    ORDER BY id ASC
+                """, (c,))
+
+                values = [r[0] for r in cur.fetchall()]
+                plt.plot(values, label=f"{c} raw")
+
+        plt.legend()
+
+    # =====================================
+    # CAS CAPTEUR UNIQUE
+    # =====================================
+    else:
+
+        if type_data == "ALL":
+
+            cur.execute("""
+                SELECT raw_value, filtered_value
+                FROM mesures
+                WHERE capteur_id=?
+                ORDER BY id ASC
+            """, (capteur,))
+
+            raw = []
+            filt = []
+
+            for r in cur.fetchall():
+                raw.append(r[0])
+                filt.append(r[1])
+
+            plt.plot(raw, label="raw")
+            plt.plot(filt, label="filtered")
+            plt.legend()
+
+        elif type_data == "filtered":
+
+            cur.execute("""
+                SELECT filtered_value
+                FROM mesures
+                WHERE capteur_id=?
+                ORDER BY id ASC
+            """, (capteur,))
+
+            values = [r[0] for r in cur.fetchall()]
+            plt.plot(values)
+
+        else:
+
+            cur.execute("""
+                SELECT raw_value
+                FROM mesures
+                WHERE capteur_id=?
+                ORDER BY id ASC
+            """, (capteur,))
+
+            values = [r[0] for r in cur.fetchall()]
+            plt.plot(values)
+
+    conn.close()
+
+    # =====================================
+    # GRAPH IMAGE
+    # =====================================
+    plt.title(f"Dashboard {capteur} ({type_data})")
     plt.xlabel("temps")
     plt.ylabel("valeur")
 
@@ -193,11 +286,24 @@ def dashboard():
 
     graph = base64.b64encode(img.getvalue()).decode()
 
+    # =====================================
+    # OPTIONS DYNAMIQUES HTML
+    # =====================================
+    options_capteurs = ""
+
+    options_capteurs += f'<option value="ALL" {"selected" if capteur=="ALL" else ""}>Tous les capteurs</option>'
+
+    for c in capteurs_db:
+        options_capteurs += f'<option value="{c}" {"selected" if capteur==c else ""}>{c}</option>'
+
+    # =====================================
+    # HTML BOOTSTRAP
+    # =====================================
     return f"""
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Dashboard Capteurs</title>
+    <title>Dashboard IoT</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
@@ -208,22 +314,29 @@ def dashboard():
 
 <div class="container mt-4">
 
-    <h1 class="text-center mb-4">📊 Dashboard Capteurs</h1>
+    <h1 class="text-center mb-4">📊 Dashboard IoT Dynamique</h1>
 
     <div class="card bg-secondary text-white p-3 mb-3">
 
         <form method="get" class="row g-3">
 
+            <!-- CAPTEURS DYNAMIQUES -->
             <div class="col-md-6">
                 <label class="form-label">Capteur</label>
-                <input class="form-control" name="capteur" value="{capteur}">
+                <select class="form-control" name="capteur">
+                    {options_capteurs}
+                </select>
             </div>
 
+            <!-- TYPE -->
             <div class="col-md-6">
-                <label class="form-label">Type</label>
+                <label class="form-label">Type de données</label>
                 <select class="form-control" name="type">
+
                     <option value="raw" {"selected" if type_data=="raw" else ""}>Raw</option>
                     <option value="filtered" {"selected" if type_data=="filtered" else ""}>Filtered</option>
+                    <option value="ALL" {"selected" if type_data=="ALL" else ""}>Raw + Filtered</option>
+
                 </select>
             </div>
 
@@ -232,6 +345,7 @@ def dashboard():
             </div>
 
         </form>
+
     </div>
 
     <div class="card bg-dark border-light p-3 text-center">
@@ -253,7 +367,7 @@ def dashboard():
 # =====================================
 @app.route("/")
 def home():
-    return "Serveur capteurs actif"
+    return "Home PAGE , Serveur capteurs actif"
 
 
 # =====================================
