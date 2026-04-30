@@ -10,7 +10,6 @@
 //const float VCC = 5.0;
 const float alpha = 0.0512; // ce parametre permet de faire du lissage ( plus elle est basse plus la courbe est lisse , mais elle ralentie la progression de la courbe )
 
-
 // =======================
 // CLASSE CAPTEUR
 // =======================
@@ -114,6 +113,5 @@ void loop() {
   Serial.println();
   delay(50);
 }
-
 void resister(JsonObject obj , String name , float value ){
 }
