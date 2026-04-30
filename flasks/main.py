@@ -1,10 +1,12 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify , Response , render_template
 import psycopg2
 import os
 import json
 from datetime import datetime
 import matplotlib.pyplot as plt
 import io, base64
+import csv
+
 
 app = Flask(__name__)
 
@@ -216,14 +218,66 @@ def dashboard():
 
     graph = base64.b64encode(img.getvalue()).decode()
 
-    return f"""
-    <html>
-    <body style="background:#111;color:white;text-align:center;">
-        <h2>Dashboard Capteurs</h2>
-        <img src="data:image/png;base64,{graph}">
-    </body>
-    </html>
-    """
+    return render_template(
+            "dashboard.html",
+            graph=graph,
+            capteur=capteur,
+            type_data=type_data,
+            capteurs_db=capteurs_db
+        )
+
+
+# =========================
+# EXPORT CSV
+# =========================
+@app.route("/api/export")
+def export_csv():
+
+    capteur = request.args.get("capteur", "ALL")
+
+    conn = get_conn()
+    cur = conn.cursor()
+
+    if capteur == "ALL":
+        cur.execute("""
+            SELECT id, capteur_id, raw_value, filtered_value, created_at
+            FROM mesures
+            ORDER BY id ASC
+        """)
+    else:
+        cur.execute("""
+            SELECT id, capteur_id, raw_value, filtered_value, created_at
+            FROM mesures
+            WHERE capteur_id=%s
+            ORDER BY id ASC
+        """, (capteur,))
+
+    rows = cur.fetchall()
+    conn.close()
+
+    # Création CSV en mémoire
+    output = io.StringIO()
+    writer = csv.writer(output)
+
+    # Header
+    writer.writerow(["id", "capteur", "raw", "filtered", "date"])
+
+    # Données
+    for r in rows:
+        writer.writerow(r)
+
+    csv_data = output.getvalue()
+    output.close()
+
+    return Response(
+        csv_data,
+        mimetype="text/csv",
+        headers={
+            "Content-Disposition": "attachment; filename=mesures.csv"
+        }
+    )
+
+
 
 # =========================
 # HOME

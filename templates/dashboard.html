@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard IoT</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <meta http-equiv="refresh" content="5">
+</head>
+
+<body class="bg-dark text-light">
+
+<div class="container mt-4">
+
+    <h1 class="text-center mb-4">📊 Dashboard Capteurs</h1>
+
+    <div class="card bg-secondary text-white p-3 mb-3 shadow">
+
+        <form method="get" class="row g-3">
+
+            <!-- CAPTEUR -->
+            <div class="col-md-6">
+                <label class="form-label">Capteur</label>
+                <select class="form-select" name="capteur">
+
+                    <option value="ALL" {% if capteur == "ALL" %}selected{% endif %}>
+                        Tous les capteurs
+                    </option>
+
+                    {% for c in capteurs_db %}
+                        <option value="{{ c }}" {% if capteur == c %}selected{% endif %}>
+                            {{ c }}
+                        </option>
+                    {% endfor %}
+
+                </select>
+            </div>
+
+            <!-- TYPE -->
+            <div class="col-md-6">
+                <label class="form-label">Type</label>
+                <select class="form-select" name="type">
+
+                    <option value="raw" {% if type_data == "raw" %}selected{% endif %}>Raw</option>
+                    <option value="filtered" {% if type_data == "filtered" %}selected{% endif %}>Filtered</option>
+                    <option value="ALL" {% if type_data == "ALL" %}selected{% endif %}>Raw + Filtered</option>
+
+                </select>
+            </div>
+
+            <div class="col-12">
+                <button class="btn btn-primary w-100">🔄 Actualiser</button>
+            </div>
+
+        </form>
+
+    </div>
+
+    <!-- EXPORT -->
+    <div class="text-center mb-3">
+        <a href="/api/export?capteur={{ capteur }}" class="btn btn-warning">
+            ⬇️ Télécharger CSV
+        </a>
+    </div>
+
+    <!-- GRAPH -->
+    <div class="card bg-dark border-light p-3 text-center shadow">
+        <img src="data:image/png;base64,{{ graph }}" class="img-fluid">
+    </div>
+
+</div>
+
+</body>
+</html>
