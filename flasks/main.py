@@ -139,12 +139,10 @@ def one_capteur(capteur_id):
 # =========================
 # DASHBOARD
 # =========================
+import matplotlib.dates as mdates
+
 @app.route("/dashboard")
 def dashboard():
-
-
-    # ... reste de ton code pour générer le graphique ...
-
 
     capteur = request.args.get("capteur", "ALL")
     type_data = request.args.get("type", "raw")
@@ -162,10 +160,10 @@ def dashboard():
         for c in capteurs_db:
 
             cur.execute("""
-                SELECT raw_value, filtered_value
+                SELECT raw_value, filtered_value, created_at
                 FROM mesures
                 WHERE capteur_id=%s
-                ORDER BY id ASC
+                ORDER BY created_at ASC
             """, (c,))
 
             rows = cur.fetchall()
@@ -175,41 +173,48 @@ def dashboard():
 
             raw = [r[0] for r in rows]
             filt = [r[1] for r in rows]
+            dates = [r[2] for r in rows]
 
             if type_data == "ALL":
-                plt.plot(raw, label=f"{c} raw")
-                plt.plot(filt, label=f"{c} filtered")
+                plt.plot(dates, raw, label=f"{c} raw")
+                plt.plot(dates, filt, label=f"{c} filtered")
             elif type_data == "filtered":
-                plt.plot(filt, label=f"{c} filtered")
+                plt.plot(dates, filt, label=f"{c} filtered")
             else:
-                plt.plot(raw, label=f"{c} raw")
+                plt.plot(dates, raw, label=f"{c} raw")
 
         plt.legend()
 
     else:
 
         cur.execute("""
-            SELECT raw_value, filtered_value
+            SELECT raw_value, filtered_value, created_at
             FROM mesures
             WHERE capteur_id=%s
-            ORDER BY id ASC
+            ORDER BY created_at ASC
         """, (capteur,))
 
         rows = cur.fetchall()
 
-        raw = [r[0] for r in rows]
-        filt = [r[1] for r in rows]
+        if rows:
+            raw = [r[0] for r in rows]
+            filt = [r[1] for r in rows]
+            dates = [r[2] for r in rows]
 
-        if type_data == "ALL":
-            plt.plot(raw, label="raw")
-            plt.plot(filt, label="filtered")
-            plt.legend()
-        elif type_data == "filtered":
-            plt.plot(filt)
-        else:
-            plt.plot(raw)
+            if type_data == "ALL":
+                plt.plot(dates, raw, label="raw")
+                plt.plot(dates, filt, label="filtered")
+                plt.legend()
+            elif type_data == "filtered":
+                plt.plot(dates, filt)
+            else:
+                plt.plot(dates, raw)
 
     conn.close()
+
+    # Format heure
+    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%H:%M:%S'))
+    plt.gcf().autofmt_xdate()
 
     plt.title(f"Dashboard {capteur}")
     plt.xlabel("time")
@@ -223,13 +228,12 @@ def dashboard():
     graph = base64.b64encode(img.getvalue()).decode()
 
     return render_template(
-            "dashboard.html",
-            graph=graph,
-            capteur=capteur,
-            type_data=type_data,
-            capteurs_db=capteurs_db
-        )
-
+        "dashboard.html",
+        graph=graph,
+        capteur=capteur,
+        type_data=type_data,
+        capteurs_db=capteurs_db
+    )
 
 # =========================
 # EXPORT CSV
