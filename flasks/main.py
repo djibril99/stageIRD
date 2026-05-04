@@ -145,10 +145,16 @@ def dashboard():
     if request.method == "POST" and request.form.get("action") == "clear":
         conn = get_conn()
         cur = conn.cursor()
-        cur.execute("DELETE FROM mesures")
-        cur.execute("ALTER SEQUENCE mesures_id_seq RESTART WITH 1")
-        conn.commit()
-        conn.close()
+        try:
+            cur.execute("DELETE FROM mesures")
+            cur.execute("ALTER SEQUENCE mesures_id_seq RESTART WITH 1")
+            conn.commit()
+            print("Base de données vidée avec succès")
+        except Exception as e:
+            print(f"Erreur : {e}")
+            conn.rollback()
+        finally:
+            conn.close()
     
     # ... reste de ton code pour générer le graphique ...
 
