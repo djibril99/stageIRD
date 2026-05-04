@@ -1,6 +1,7 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include "esp_wpa2.h"
+#include <ArduinoJson.h>
 
 // =========================
 // Delai
@@ -148,10 +149,23 @@ void loop() {
     lastJson = Serial2.readStringUntil('\n');
     lastJson.trim();
 
-    if (lastJson.length() > 0) { //nouvelle donnée 
-      dataPending = true;
-      Serial.println(lastJson);
+    if (lastJson.length() > 0) { //nouvelle donnée  
+      // Allocate a JSON document in memory
+      StaticJsonDocument<1500> doc;
+      DeserializationError error = deserializeJson(doc, lastJson);
+
+      // Check for parsing errors
+      if (error) {
+      Serial.print(F("Deserialization failed: "));
+      Serial.println(error.f_str());
+      dataPending = false;
+      }
+      else{
+        dataPending = true;
+      }
     }
+    
+
   }
 
   // ===== SEND DATA =====
@@ -182,6 +196,7 @@ void loop() {
       unsigned long now = millis();
       while (now - start < duree) {
         Serial.println(duree - now - start ) ; 
+        
         now = millis();
       }
 
