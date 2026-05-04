@@ -54,15 +54,10 @@
         </a>
 
         <!-- Bouton Effacer (Rouge) -->
-        <form action="/dashboard" method="POST" onsubmit="return confirm('⚠️ ATTENTION : Voulez-vous vraiment supprimer toutes les données de la base ?');">
-            <input type="hidden" name="action" value="clear">
-            <button type="submit" class="btn btn-danger">
-                🗑️ Effacer les données
-            </button>
-        </form>
-
         <form action="/clear" method="POST">
-            <button type="submit">Vider la base</button>
+            <button type="submit" onclick="return confirm('Tu veux vraiment vider la base ?')">
+                Clear database
+            </button>
         </form>
     </div>
 

@@ -280,6 +280,7 @@ def export_csv():
             "Content-Disposition": "attachment; filename=mesures.csv"
         }
     )
+from flask import redirect, url_for
 
 @app.route("/clear", methods=["POST"])
 def clear():
@@ -296,7 +297,7 @@ def clear():
     finally:
         conn.close()
 
-    return dashboard()
+    return redirect(url_for("dashboard"))
 
 
 # =========================
