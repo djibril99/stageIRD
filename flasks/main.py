@@ -142,6 +142,17 @@ def one_capteur(capteur_id):
 @app.route("/dashboard")
 def dashboard():
 
+    if request.method == "POST" and request.form.get("action") == "clear":
+        conn = get_conn()
+        cur = conn.cursor()
+        cur.execute("DELETE FROM mesures")
+        cur.execute("ALTER SEQUENCE mesures_id_seq RESTART WITH 1")
+        conn.commit()
+        conn.close()
+    
+    # ... reste de ton code pour générer le graphique ...
+
+
     capteur = request.args.get("capteur", "ALL")
     type_data = request.args.get("type", "raw")
 

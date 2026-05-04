@@ -96,10 +96,14 @@ class Capteur {
 };
 // CAPTEURS
 // =======================
-Capteur capA6(A6 ,28,19);
+
 Capteur capA0(A0 ,8,7);
 Capteur capA1(A1 ,10,9 );
 Capteur capA2(A2,12,11);
+Capteur capA3(A3,14,13);
+
+Capteur capA6(A6 ,28,19);
+
 
 // =======================
 // SETUP
@@ -127,6 +131,9 @@ void loop() {
   float rawA2 = capA2.readRaw();
   float filtA2 = capA2.readFiltered();
 
+  float rawA3 = capA3.readRaw();
+  float filtA3 = capA3.readFiltered();
+
   // JSON
   StaticJsonDocument<300> doc;
 
@@ -145,6 +152,10 @@ void loop() {
   JsonObject a2 = doc["a2"].to<JsonObject>();
   a2["raw"] = rawA2;
   a2["f"] = filtA2;
+
+  JsonObject a3 = doc["a3"].to<JsonObject>();
+  a3["raw"] = rawA3;
+  a3["f"] = filtA3;
 
   // envoi ESP32
   serializeJson(doc, Serial1);
