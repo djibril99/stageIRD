@@ -142,20 +142,7 @@ def one_capteur(capteur_id):
 @app.route("/dashboard")
 def dashboard():
 
-    if request.method == "POST" and request.form.get("action") == "clear":
-        conn = get_conn()
-        cur = conn.cursor()
-        try:
-            cur.execute("DELETE FROM mesures")
-            cur.execute("ALTER SEQUENCE mesures_id_seq RESTART WITH 1")
-            conn.commit()
-            print("Base de données vidée avec succès")
-        except Exception as e:
-            print(f"Erreur : {e}")
-            conn.rollback()
-        finally:
-            conn.close()
-    
+
     # ... reste de ton code pour générer le graphique ...
 
 
@@ -294,6 +281,22 @@ def export_csv():
         }
     )
 
+@app.route("/clear", methods=["POST"])
+def clear():
+    conn = get_conn()
+    cur = conn.cursor()
+
+    try:
+        cur.execute("DELETE FROM mesures")
+        cur.execute("ALTER SEQUENCE mesures_id_seq RESTART WITH 1")
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+        print(e)
+    finally:
+        conn.close()
+
+    return dashboard()
 
 
 # =========================
