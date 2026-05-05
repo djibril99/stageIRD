@@ -106,7 +106,42 @@ def all_data():
         }
         for r in rows
     ])
+@app.route("/api/data")
+def api_data():
+    capteur = request.args.get("capteur", "ALL")
 
+    conn = get_conn()
+    cur = conn.cursor()
+
+    if capteur == "ALL":
+        cur.execute("""
+            SELECT capteur_id, raw_value, filtered_value, created_at
+            FROM mesures
+            ORDER BY created_at ASC
+            LIMIT 1000
+        """)
+    else:
+        cur.execute("""
+            SELECT capteur_id, raw_value, filtered_value, created_at
+            FROM mesures
+            WHERE capteur_id=%s
+            ORDER BY created_at ASC
+            LIMIT 1000
+        """, (capteur,))
+
+    rows = cur.fetchall()
+    conn.close()
+
+    data = []
+    for r in rows:
+        data.append({
+            "capteur": r[0],
+            "raw": r[1],
+            "filtered": r[2],
+            "time": r[3].isoformat()   # 🔥 important pour Plotly
+        })
+
+    return {"data": data}
 # =========================
 # ONE SENSOR
 # =========================
@@ -234,7 +269,9 @@ def dashboard():
         type_data=type_data,
         capteurs_db=capteurs_db
     )
-
+@app.route("/dashboard2")
+def dashboard2():
+    return render_template("dashboard2.html")
 # =========================
 # EXPORT CSV
 # =========================
