@@ -14,8 +14,14 @@ app = Flask(__name__)
 # POSTGRES RENDER
 # =========================
 DATABASE_URL = "postgresql://utinamstage_user:TXWcA6nGftlMT2ALzazPYk3oSZLHAFrb@dpg-d7pk6v0g4nts73b3jnn0-a/utinamstage"
+##external url 
+
+DATABASE_URL_EXTERNAL = "postgresql://utinamstage_user:TXWcA6nGftlMT2ALzazPYk3oSZLHAFrb@dpg-d7pk6v0g4nts73b3jnn0-a.oregon-postgres.render.com/utinamstage"
+
+DATABASE_URL = DATABASE_URL_EXTERNAL
+
 def get_conn():
-    return psycopg2.connect(DATABASE_URL)
+    return psycopg2.connect(DATABASE_URL, sslmode="require")
 
 # =========================
 # INIT DB

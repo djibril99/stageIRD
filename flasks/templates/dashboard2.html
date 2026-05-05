@@ -1,3 +1,8 @@
+Pour chaque cpateur  , il faut afficher ces deux donneer si demander (filtre et brute ) en couleur dufferene 
+et l utilisateur peut choisir le type de donnees a afficher (filtre , brute ou les deux )
+
+
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -72,8 +77,12 @@ body {
 </div>
 
 </div>
-
 <script>
+
+const COLORS = {
+    raw: "#ff4d4d",
+    filtered: "#4da6ff"
+};
 
 async function loadCapteurs() {
     const res = await fetch("/api/data2?capteur=ALL");
@@ -105,28 +114,46 @@ async function loadGraph() {
 
     data.forEach(d => {
 
-        if (!traces[d.capteur]) {
-            traces[d.capteur] = {
-                x: [],
-                y: [],
-                mode: "lines",
-                name: d.capteur,
-                fill: "tozeroy",
-                opacity: 0.3
-            };
+        const keyRaw = d.capteur + "_raw";
+        const keyFilt = d.capteur + "_filtered";
+
+        // RAW
+        if (type === "raw" || type === "ALL") {
+
+            if (!traces[keyRaw]) {
+                traces[keyRaw] = {
+                    x: [],
+                    y: [],
+                    mode: "lines",
+                    name: d.capteur + " RAW",
+                    line: { color: COLORS.raw },
+                    fill: "tozeroy",
+                    opacity: 0.25
+                };
+            }
+
+            traces[keyRaw].x.push(d.time);
+            traces[keyRaw].y.push(d.raw);
         }
 
-        if (type === "raw") {
-            traces[d.capteur].y.push(d.raw);
-        } 
-        else if (type === "filtered") {
-            traces[d.capteur].y.push(d.filtered);
-        } 
-        else {
-            traces[d.capteur].y.push(d.raw);
-        }
+        // FILTERED
+        if (type === "filtered" || type === "ALL") {
 
-        traces[d.capteur].x.push(d.time);
+            if (!traces[keyFilt]) {
+                traces[keyFilt] = {
+                    x: [],
+                    y: [],
+                    mode: "lines",
+                    name: d.capteur + " FILTERED",
+                    line: { color: COLORS.filtered },
+                    fill: "tozeroy",
+                    opacity: 0.25
+                };
+            }
+
+            traces[keyFilt].x.push(d.time);
+            traces[keyFilt].y.push(d.filtered);
+        }
     });
 
     const plotData = Object.values(traces);
@@ -136,6 +163,7 @@ async function loadGraph() {
             text: "Capteur Résistif IRD",
             font: { size: 22, color: "white" }
         },
+
         paper_bgcolor: "#0f172a",
         plot_bgcolor: "#0f172a",
 
@@ -144,10 +172,16 @@ async function loadGraph() {
             type: "date",
             color: "white"
         },
+
         yaxis: {
             title: "Valeur",
             color: "white"
+        },
+
+        legend: {
+            font: { color: "white" }
         }
+
     }, {
         responsive: true
     });
@@ -157,6 +191,8 @@ async function loadGraph() {
 loadCapteurs().then(loadGraph);
 
 </script>
+
+
 
 </body>
 </html>
