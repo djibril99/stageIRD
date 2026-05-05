@@ -1,8 +1,3 @@
-Pour chaque cpateur  , il faut afficher ces deux donneer si demander (filtre et brute ) en couleur dufferene 
-et l utilisateur peut choisir le type de donnees a afficher (filtre , brute ou les deux )
-
-
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -84,6 +79,18 @@ const COLORS = {
     filtered: "#4da6ff"
 };
 
+// 🔥 map couleur par capteur
+const colorMap = {};
+
+// 🎨 couleur stable par capteur
+function getColor(capteur) {
+    if (!colorMap[capteur]) {
+        const hue = Math.floor(Math.random() * 360);
+        colorMap[capteur] = `hsl(${hue}, 80%, 55%)`;
+    }
+    return colorMap[capteur];
+}
+
 async function loadCapteurs() {
     const res = await fetch("/api/data2?capteur=ALL");
     const json = await res.json();
@@ -117,6 +124,8 @@ async function loadGraph() {
         const keyRaw = d.capteur + "_raw";
         const keyFilt = d.capteur + "_filtered";
 
+        const color = getColor(d.capteur);
+
         // RAW
         if (type === "raw" || type === "ALL") {
 
@@ -126,9 +135,12 @@ async function loadGraph() {
                     y: [],
                     mode: "lines",
                     name: d.capteur + " RAW",
-                    line: { color: COLORS.raw },
-                    fill: "tozeroy",
-                    opacity: 0.25
+                    line: {
+                        color: color,
+                        width: 2
+                    },
+                    fill: "none",
+                    opacity: 0.6
                 };
             }
 
@@ -145,9 +157,13 @@ async function loadGraph() {
                     y: [],
                     mode: "lines",
                     name: d.capteur + " FILTERED",
-                    line: { color: COLORS.filtered },
-                    fill: "tozeroy",
-                    opacity: 0.25
+                    line: {
+                        color: color,
+                        width: 3,
+                        dash: "dot"
+                    },
+                    fill: "none",
+                    opacity: 0.9
                 };
             }
 
@@ -191,8 +207,6 @@ async function loadGraph() {
 loadCapteurs().then(loadGraph);
 
 </script>
-
-
 
 </body>
 </html>
