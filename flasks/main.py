@@ -60,17 +60,14 @@ def insert_capteur(capteur_id, raw_val, filt_val):
 # =========================
 # RECEIVE DATA ESP32
 # =========================
-@app.route("/api/data", methods=["POST", "GET"])
+@app.route("/api/data", methods=["POST"])
 def recevoir():
+    data = request.get_json()
 
-    if request.method == "POST":
-        data = request.get_json(force=True)
-    else:
-        raw_json = request.args.get("json")
-        data = json.loads(raw_json)
+    if not data:
+        return jsonify({"error": "No JSON received"}), 400
 
     for capteur_id, valeurs in data.items():
-
         raw_val = valeurs.get("raw", 0)
         filt_val = valeurs.get("f", 0)
 
@@ -106,7 +103,7 @@ def all_data():
         }
         for r in rows
     ])
-@app.route("/api/data2")
+@app.route("/api/data2" , methods=["GET"])
 def api_data():
     capteur = request.args.get("capteur", "ALL")
 
