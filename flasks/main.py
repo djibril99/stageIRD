@@ -92,7 +92,6 @@ def api_data():
             SELECT capteur_id, raw_value, filtered_value, created_at
             FROM mesures
             ORDER BY created_at ASC
-            LIMIT 1000
         """)
     else:
         cur.execute("""
@@ -100,7 +99,6 @@ def api_data():
             FROM mesures
             WHERE capteur_id=%s
             ORDER BY created_at ASC
-            LIMIT 1000
         """, (capteur,))
 
     rows = cur.fetchall()
