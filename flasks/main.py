@@ -218,7 +218,7 @@ def clear():
     return redirect(url_for("dashboard2"))
 
 
-@app.route("/api/delete_above_1023", methods=["POST"])
+@app.route("/api/delete_above_1023", methods=["POST" , "GET"])
 def delete_above_1023():
     conn = get_conn()
     cur = conn.cursor()
