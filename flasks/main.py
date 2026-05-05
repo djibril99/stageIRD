@@ -344,7 +344,6 @@ def clear():
 @app.route("/")
 def home():
     return "Flask + PostgreSQL Render OK"
-
 # =========================
 # START
 # =========================

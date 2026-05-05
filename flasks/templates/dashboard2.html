@@ -13,6 +13,10 @@
 <script>
 async function loadGraph() {
     const res = await fetch("/api/data2");
+    console.log("rest :", res);
+
+
+
     const json = await res.json();
 
     const data = json.data;
