@@ -217,7 +217,7 @@ def clear():
     finally:
         conn.close()
 
-    return redirect(url_for("dashboard"))
+    return redirect(url_for("dashboard2"))
 
 
 # =========================
