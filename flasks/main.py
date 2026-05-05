@@ -218,6 +218,22 @@ def clear():
     return redirect(url_for("dashboard2"))
 
 
+@app.route("/api/delete_above_1023", methods=["POST"])
+def delete_above_1023():
+    conn = get_conn()
+    cur = conn.cursor()
+
+    cur.execute("""
+        DELETE FROM mesures
+        WHERE raw_value > 1023
+           OR filtered_value > 1023
+    """)
+
+    conn.commit()
+    conn.close()
+
+    return {"status": "deleted", "rule": ">1023"}
+
 # =========================
 # HOME
 # =========================
