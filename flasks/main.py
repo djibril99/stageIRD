@@ -106,7 +106,7 @@ def all_data():
         }
         for r in rows
     ])
-@app.route("/api/data")
+@app.route("/api/data2")
 def api_data():
     capteur = request.args.get("capteur", "ALL")
 
