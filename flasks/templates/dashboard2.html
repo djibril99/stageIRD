@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
 </head>
 <body>
 
@@ -9,12 +9,20 @@
 
 <div id="graph" style="width:100%;height:600px;"></div>
 
+
 <script>
 async function loadGraph() {
     const res = await fetch("/api/data");
     const json = await res.json();
 
     const data = json.data;
+
+    console.log("DATA:", data);
+
+    if (!data || data.length === 0) {
+        console.error("Aucune donnée !");
+        return;
+    }
 
     const traces = {};
 
@@ -25,7 +33,7 @@ async function loadGraph() {
                 y: [],
                 mode: "lines",
                 name: d.capteur,
-                fill: "tozeroy",          // 🔥 aire colorée
+                fill: "tozeroy",
                 opacity: 0.3
             };
         }
@@ -34,11 +42,15 @@ async function loadGraph() {
         traces[d.capteur].y.push(d.raw);
     });
 
-    Plotly.newPlot("graph", Object.values(traces), {
-        title: "Capteurs (temps réel)",
+    const plotData = Object.values(traces);
+
+    console.log("TRACES:", plotData);
+
+    Plotly.newPlot("graph", plotData, {
+        title: "Capteurs",
         xaxis: {
             title: "Date / Heure",
-            type: "date"   // 🔥 active affichage date + heure
+            type: "date"
         },
         yaxis: {
             title: "Valeur"
@@ -47,9 +59,6 @@ async function loadGraph() {
 }
 
 loadGraph();
-
-// refresh auto (optionnel)
-setInterval(loadGraph, 5000);
 </script>
 
 </body>
