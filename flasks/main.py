@@ -227,6 +227,27 @@ def clear():
 
     return redirect(url_for("dashboard2"))
 
+#cette fois ci, une route qui recupere la requette pas poste , et ce texte sera executer en sql 
+@app.route("/api/execute_sql", methods=["POST"])
+def execute_sql():
+    sql_query = request.form.get("sql_query")
+
+    if not sql_query:
+        return jsonify({"error": "No SQL query provided"}), 400
+
+    conn = get_conn()
+    cur = conn.cursor()
+
+    try:
+        cur.execute(sql_query)
+        conn.commit()
+        return jsonify({"status": "success", "message": "SQL query executed"})
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"status": "error", "message": str(e)}), 400
+    finally:
+        conn.close()
+
 
 @app.route("/api/delete_above_1023", methods=["POST" , "GET"])
 def delete_above_1023():
