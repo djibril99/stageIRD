@@ -45,6 +45,16 @@ def init_db():
 # INSERT DATA
 # =========================
 def insert_capteur(capteur_id, raw_val, filt_val):
+
+    #verifier si le les donner sont bonne 
+    if int(raw_val) < 0 or int(raw_val) > 1023:
+        print(f"Valeur brute invalide pour {capteur_id}: {raw_val}")
+        return
+    if int(filt_val) < 0 or int(filt_val) > 1023:
+        print(f"Valeur filtrée invalide pour {capteur_id}: {filt_val}")
+        return
+
+
     conn = get_conn()
     cur = conn.cursor()
 
