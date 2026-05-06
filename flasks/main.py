@@ -223,10 +223,11 @@ def delete_above_1023():
     conn = get_conn()
     cur = conn.cursor()
 
+  
+    #SUPPRIMER LES DONNER DU a22 ET a 
     cur.execute("""
         DELETE FROM mesures
-        WHERE raw_value > 1023
-           OR filtered_value > 1023
+        WHERE capteur_id IN ('a22', 'a')
     """)
 
     conn.commit()
