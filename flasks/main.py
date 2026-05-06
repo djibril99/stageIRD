@@ -120,7 +120,7 @@ def api_data():
             "capteur": r[0],
             "raw": r[1],
             "filtered": r[2],
-            "time": r[3].isoformat()   # 🔥 important pour Plotly
+            "time": r[3].isoformat()
         })
 
     return {"data": data}
@@ -248,23 +248,6 @@ def execute_sql():
     finally:
         conn.close()
 
-
-@app.route("/api/delete_above_1023", methods=["POST" , "GET"])
-def delete_above_1023():
-    conn = get_conn()
-    cur = conn.cursor()
-
-    cur.execute("""
-        DELETE FROM mesures
-        WHERE raw_value > 1023
-           OR filtered_value > 1023
-    """)
-    #SUPPRIMER LES DONNER DU a22 ET a 
-    
-    conn.commit()
-    conn.close()
-
-    return {"status": "deleted", "rule": ">1023"}
 
 # =========================
 # HOME
