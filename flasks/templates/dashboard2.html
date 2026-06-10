@@ -98,10 +98,10 @@ const COLORS = {
     filtered: "#4da6ff"
 };
 
-// 🔥 map couleur par capteur
+//map couleur par capteur
 const colorMap = {};
 
-// 🎨 couleur stable par capteur
+// couleur stable par capteur
 function getColor(capteur) {
     if (!colorMap[capteur]) {
         const hue = Math.floor(Math.random() * 360);
@@ -158,9 +158,10 @@ async function loadGraph() {
                         color: color,
                         width: 2
                     },
-                    fill: "tozeroy",
-                    fillcolor: color.replace("hsl", "hsla").replace(")", ", 0.6)"),
-                    opacity: 0.7
+                    
+                    //fill: "tozeroy",
+                    //fillcolor: color.replace("hsl", "hsla").replace(")", ", 0.6)"),
+                    //opacity: 0.7
                 };
             }
 
@@ -196,7 +197,7 @@ async function loadGraph() {
 
     Plotly.newPlot("graph", plotData, {
         title: {
-            text: "Capteur Résistif IRD",
+            text: "Capteur Résistif",
             font: { size: 22, color: "white" }
         },
 
