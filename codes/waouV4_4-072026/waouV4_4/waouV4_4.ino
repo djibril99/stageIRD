@@ -4,12 +4,20 @@
 #include <Wire.h>    
 #include "RTClib.h"
 #include <SD.h>
+//definir deux tableaux de pin (vcc et gnd) pour pouvoir faire le changement de polarité
+#define SENSOR_VCC {7, 9, 11, 13, 15, 17, 19, 24}
+#define SENSOR_GND {8, 10, 12, 14, 16, 18, 28, 26}
+#define ANALOG_PINS {A0, A1, A2, A3, A4, A5, A6, A7}
 
+#define SENSOR_NAME "WAOU1"
+
+#define NB_AQUISITION 500
+
+#define SerialAT Serial2
 
 #define FILE_NAME "data.csv"
 #define FILE_NAME_save "dataLog.csv"
-
-
+//entête CSV
 #define CSV_HEADER "UnixTime;Station;MessageID;RefrenceFixe;Sonde2;Sonde3;Sonde4;Sonde5;Sonde6;Sonde7;watermark"
 #define CSV_HEADER_LOG "temps;RefrenceFixe;Sonde2;Sonde3;Sonde4;Sonde5;Sonde6;Sonde7;waterMak"
 
@@ -19,7 +27,25 @@ long watchdog_courant = 0;
 const long watchdog_delay = 60000*60;
 int messageID = 0;
 
+unsigned long mydate;
+////pour le redémarrage du capteur/////////////////////////
+uint32_t startTime = 0; // date de départ en seconde
+unsigned long initOffset = 1000000000; // date de départ en seconde
+unsigned long lastUpdate = 1000000000;
 
+int vccPins[] = SENSOR_VCC;
+int gndPins[] = SENSOR_GND;
+int analogPins[] = ANALOG_PINS;
+int taille = 8 ;
+
+float w[8];
+
+RTC_DS3231 rtc;
+//////////////FILE///////////////////////////
+File myFile;
+File myFile2;
+
+DateTime now;
 
 
 void razWatchdog()
@@ -63,16 +89,13 @@ void processRebootWatchdog()
    }
 }
 
-
-
-///////fonction de pause a supprimer pour debaugage 
+///////fonction de pause
 void pauseSnd(unsigned long dureeMs, unsigned long periodeMs = 60000)
 {
-  dureeMs = dureeMs * 1000; 
-   Serial.print("Pause de  ");
-  Serial.print(dureeMs );
-   Serial.print("(s)");
-
+    dureeMs = dureeMs * 1000; 
+    Serial.print("Pause de  ");
+    Serial.print(dureeMs );
+    Serial.print("(s)");
     
     unsigned long debut = millis();
 
@@ -91,7 +114,7 @@ void pauseSnd(unsigned long dureeMs, unsigned long periodeMs = 60000)
 }
 
 
-
+// entêtes des fichiers Csv
 void createCSVHeader()
 {
     if (!SD.exists(FILE_NAME))
@@ -115,55 +138,7 @@ void createCSVHeader()
     }
 }
 
-////pour le redémarrage du capteur/////////////////////////
 
-uint32_t startTime = 0; // date de départ en seconde
-unsigned long initOffset = 1000000000; // date de départ en seconde
-unsigned long lastUpdate = 1000000000;
-
-
-/*
-#define SENSOR_1 9
-#define SENSOR_2 10
-#define SENSOR_3 11
-#define SENSOR_4 12
-#define SENSOR_5 13
-#define SENSOR_6 14
-#define SENSOR_7 15
-#define SENSOR_8 16
-*/
-//definir deux tableaux de pin (vcc et gnd) pour pouvoir faire le changement de polarité
-#define SENSOR_VCC {7, 9, 11, 13, 15, 17, 19, 24}
-#define SENSOR_GND {8, 10, 12, 14, 16, 18, 28, 26}
-#define ANALOG_PINS {A0, A1, A2, A3, A4, A5, A6, A7}
-
-
-
-int vccPins[] = SENSOR_VCC;
-int gndPins[] = SENSOR_GND;
-int analogPins[] = ANALOG_PINS;
-int taille = 8 ;
-
-float w[8];
-
-
-
-#define SENSOR_NAME "WAOU1"
-
-#define NB_AQUISITION 500
-
-#define SerialAT Serial2
-
-
-RTC_DS3231 rtc;
-
-
-//////////////FILE///////////////////////////
-File myFile;
-File myFile2;
-
-
-DateTime now;
 
 ///////////// SETUP FUNCTION //////////////
 void setup() 
@@ -180,7 +155,7 @@ void setup()
   }
 
   wakeupSD();          // démarrage SD
-  createCSVHeader();   // maintenant seulement
+  createCSVHeader();   // entête  cvs à créer
 
   setupSensors();
   shutDownSensors();
@@ -215,11 +190,14 @@ void saveDataIn(String message)
    // if the file opened okay, write to it:
   if (myFile) 
   {
-    //Serial.print("Writing to test.txt...");
+    Serial.print("Writing to ");
+    Serial.print(FILE_NAME);
+    Serial.println(" .......");
+
     myFile.println(message);
   // close the file:
     myFile.close();
-    //Serial.println("done.");
+    Serial.println("done.");
   } 
   else 
   {
@@ -235,7 +213,10 @@ void saveDataIn_no_date(String message)
    // if the file opened okay, write to it:
   if (myFile2) 
   {
-    Serial.print("Writing to no_date.txt...");
+    Serial.print("Writing to ");
+    Serial.print(FILE_NAME_save);
+    Serial.println(" .......");
+
     myFile2.println(message);
   // close the file:
     myFile2.close();
@@ -273,43 +254,15 @@ void updateClock()
 void setupSensors()
 {
   Serial.println("Setup Sensors");
-  /*
-  ici
-  pinMode(SENSOR_1, OUTPUT);
-  pinMode(SENSOR_2, OUTPUT);
-  pinMode(SENSOR_3, OUTPUT);
-  pinMode(SENSOR_4, OUTPUT);
-  pinMode(SENSOR_5, OUTPUT);
-  pinMode(SENSOR_6, OUTPUT);
-  pinMode(SENSOR_7, OUTPUT);
-  pinMode(SENSOR_8, OUTPUT);
-  pinMode(6,OUTPUT);
-  pinMode(8,OUTPUT);
-  */
-
   for(int i = 0; i < taille; i++){
     pinMode(vccPins[i], OUTPUT);
     pinMode(gndPins[i], OUTPUT);
   }
-
-
   
 }
 
 void shutDownSensors()
 {
-  /*
-  ici 
-  //Serial.println("Shutdown Sensors");
-  digitalWrite(SENSOR_1, HIGH);
-  digitalWrite(SENSOR_2, HIGH);
-  digitalWrite(SENSOR_3, HIGH);
-  digitalWrite(SENSOR_4, HIGH);
-  digitalWrite(SENSOR_5, HIGH);
-  digitalWrite(SENSOR_6, HIGH);
-  digitalWrite(SENSOR_7, HIGH);
-  digitalWrite(SENSOR_8, HIGH);
-  */
   int vccPins[] = SENSOR_VCC;
   int gndPins[] = SENSOR_GND;
   int analogPins[] = ANALOG_PINS;
@@ -329,18 +282,11 @@ void startupSensor(int id)
   digitalWrite(id, LOW);
 
   //On met tout les autres capteurs en INPUT pour éviter des interférences
-  /*
-  ici 
-  for(int i = SENSOR_1; i <= SENSOR_8; i++){
-    if(id != i){
-      pinMode(i, INPUT);
-    }
-  }
-  */
+
   for(int i = 0; i < taille; i++){
     if(id != vccPins[i] && id != gndPins[i]){
-      //pinMode(vccPins[i], INPUT);
-      //pinMode(gndPins[i], INPUT);
+      pinMode(vccPins[i], INPUT);
+      pinMode(gndPins[i], INPUT);
     }
   }
 
@@ -379,10 +325,8 @@ double getHumidity(int idSensor, int p1, int p2)
   digitalWrite(p2, LOW);
   delay(10);
   val = val /(NB_AQUISITION*2);
-  //Serial.println(val,DEC);
   U=val*5/1023;
 
-  //Serial.println(U);
   Rmes=99600; //resitance de mesure (en ohm)
   Rcap=(5/(5-U)-1)*Rmes; // ATTENTION on permutte à chaque fois 
   return Rcap;
@@ -425,7 +369,6 @@ void writeToConsole(DateTime dte, double val1,double val2, double val3, double v
 
 String createMessage()
 {
-  //String m = String(w[0]) + ":" + String(w[1]) + ":" + String(w[2]) + ":" +String(w[3])+ ":" + String(w[4]) + ":" + String(w[5]) + ":" + String(w[6]) + ":" +String(w[7]);
   String m = String(w[0]) + ";" + String(w[1]) + ";" + String(w[2]) + ";" +String(w[3])+ ";" + String(w[4]) + ";" + String(w[5]) + ";" + String(w[6]) + ";" +String(w[7]);
   String message =  buildCaptureMessage(m);
   return message;
@@ -472,10 +415,6 @@ String getTime() {
   return String(buffer);
 }
 
-
-unsigned long mydate;
-
-
 void loop() 
 {
     for (int i = 0; i < taille; i++){
@@ -518,9 +457,3 @@ void saveToSD(String message)
   }
 
 
-/*
-*modificcation les la lecture des pin analogiques (c'etait partout A0 , 6,7)
-
-
-
-*/
