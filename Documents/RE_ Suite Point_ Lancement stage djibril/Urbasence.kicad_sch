@@ -1,0 +1,192 @@
+(kicad_sch
+	(version 20250901)
+	(generator "eeschema")
+	(generator_version "9.99")
+	(uuid "223ac016-07f7-4f7b-87e4-df514960503d")
+	(paper "A4")
+	(title_block
+		(title "Urbasense")
+		(date "2025-08-29")
+		(rev "3.1")
+		(company "R&D Bulgaria")
+		(comment 2 "schematic ")
+		(comment 3 "Activ")
+		(comment 4 "Tsekov")
+		(comment 5 "EN")
+	)
+	(lib_symbols)
+	(sheet
+		(at 38.608 91.694)
+		(size 56.896 57.658)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "15402efb-1d0a-4a87-8747-ca5dde630115")
+		(property "Sheetname" "LoRa_Sx1262"
+			(at 38.608 90.9824 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "LoRa_Sx1262.kicad_sch"
+			(at 38.608 149.9366 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "Urbasence"
+				(path "/223ac016-07f7-4f7b-87e4-df514960503d"
+					(page "4")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 39.37 32.766)
+		(size 55.88 50.038)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "49745beb-896e-48cb-9dad-86d1f57c38a6")
+		(property "Sheetname" "nRF54L15"
+			(at 39.37 32.0544 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "nRF54L15.kicad_sch"
+			(at 39.37 83.3886 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "Urbasence"
+				(path "/223ac016-07f7-4f7b-87e4-df514960503d"
+					(page "2")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 108.458 32.004)
+		(size 70.866 52.324)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "a0030558-5752-40f0-8956-8afb318fce6e")
+		(property "Sheetname" "Power"
+			(at 108.458 31.2924 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "Power.kicad_sch"
+			(at 108.458 84.9126 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "Urbasence"
+				(path "/223ac016-07f7-4f7b-87e4-df514960503d"
+					(page "3")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 117.348 94.234)
+		(size 56.134 50.292)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "c75ca56b-0cc4-4cd5-80b2-c8b5fcf76ef9")
+		(property "Sheetname" "LMP90100"
+			(at 117.348 93.5224 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "ADC_LMP90100.kicad_sch"
+			(at 117.348 145.1106 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "Urbasence"
+				(path "/223ac016-07f7-4f7b-87e4-df514960503d"
+					(page "5")
+				)
+			)
+		)
+	)
+	(sheet_instances
+		(path "/"
+			(page "1")
+		)
+	)
+	(embedded_fonts no)
+)

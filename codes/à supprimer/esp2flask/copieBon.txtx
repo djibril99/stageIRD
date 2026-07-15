@@ -1,0 +1,105 @@
+#include <WiFi.h>
+#include <HTTPClient.h>
+
+#define RXD2 16
+#define TXD2 17
+
+const char* ssid = "iPhone de Djibril";
+const char* password = "passer123";
+
+
+// --- Config Eduroam (Entreprise) ---
+const char* ssid_uni = "eduroam";
+#define EAP_IDENTITY "bwd2978a@univ-tlse3.fr" 
+#define EAP_PASSWORD "motDEpasse1999@"
+
+
+
+const char* serverURL = "https://stageird.onrender.com/api/data";
+
+// =========================
+// WIFI RECONNECT FUNCTION
+// =========================
+
+void connectWiFi() {
+
+  if (WiFi.status() == WL_CONNECTED) return;
+
+  Serial.println("Reconnexion WiFi...");
+
+  WiFi.disconnect();
+  WiFi.begin(ssid, password);
+
+  unsigned long start = millis();
+
+  while (WiFi.status() != WL_CONNECTED) {
+
+    delay(500);
+    Serial.print(".");
+
+    // timeout sécurité (5 sec)
+    if (millis() - start > 5000) {
+      Serial.println("\nEchec connexion WiFi");
+      return;
+    }
+  }
+
+  Serial.println("\nWiFi reconnecte !");
+  Serial.println(WiFi.localIP());
+}
+
+// =========================
+// SETUP
+// =========================
+
+void setup() {
+
+  Serial.begin(115200);
+  Serial2.begin(9600, SERIAL_8N1, RXD2, TXD2);
+  Serial.println("Demarrage");
+  connectWiFi();
+}
+
+// =========================
+// LOOP
+// =========================
+
+void loop() {
+
+  // check WiFi en continu
+  if (WiFi.status() != WL_CONNECTED) {
+    connectWiFi();
+  }
+
+  if (Serial2.available()) {
+
+    String json = Serial2.readStringUntil('\n');
+    json.trim();
+
+    Serial.println("Recu UART:");
+    Serial.println(json);
+
+    if (WiFi.status() == WL_CONNECTED) {
+
+      HTTPClient http;
+
+      http.begin(serverURL);
+      http.addHeader("Content-Type", "application/json");
+
+      int code = http.POST(json);
+
+      Serial.print("HTTP code: ");
+      Serial.println(code);
+
+      http.end();
+    }
+    else {
+      Serial.println("WiFi down → pas d'envoi");
+    }
+  }
+
+  delay(10);
+}
+
+
+//un code pimple qui lit la valeur des pin A0 jusqu A6 alanoque est es affiche 

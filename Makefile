@@ -2,3 +2,6 @@ push:
 	@git add .
 	@git commit -m "update" || echo "Rien à commit"
 	@git push
+
+run:
+	@streamlit run .\STLPLOT.py

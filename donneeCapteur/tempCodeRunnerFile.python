@@ -1,0 +1,19 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Lecture du fichier CSV
+df = pd.read_csv("H_C_25.CSV")
+
+# Affichage des premières lignes
+print(df.head())
+
+# Tracé
+plt.figure(figsize=(10, 5))
+plt.plot(df["temps_ms"], df["valeur"], marker='o')
+
+plt.xlabel("Temps (ms)")
+plt.ylabel("Valeur")
+plt.title("Hydratation")
+plt.grid(True)
+
+plt.show()
