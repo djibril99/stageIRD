@@ -4,7 +4,7 @@
 #include <Wire.h>    
 #include "RTClib.h"
 #include <SD.h>
-//definir deux tableaux de pin (vcc et gnd) pour pouvoir faire le changement de polarité
+//definir deux tableaux de pin (vcc et gnd) pour le changement de polarité
 #define SENSOR_VCC {7, 9, 11, 13, 15, 17, 19, 24}
 #define SENSOR_GND {8, 10, 12, 14, 16, 18, 28, 26}
 #define ANALOG_PINS {A0, A1, A2, A3, A4, A5, A6, A7}
@@ -22,7 +22,7 @@
 #define CSV_HEADER_LOG "temps;RefrenceFixe;Sonde2;Sonde3;Sonde4;Sonde5;Sonde6;Sonde7;waterMak"
 
 void (* reboot) (void) = 0;
-const long watchdog_max = /*1*/5*1000; //En minutes (multiple de 2 minutes)
+const long watchdog_max = /*1*/5*1000; 
 long watchdog_courant = 0;
 const long watchdog_delay = 60000*60;
 int messageID = 0;
